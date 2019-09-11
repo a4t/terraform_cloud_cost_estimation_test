@@ -33,7 +33,8 @@ resource "aws_subnet" "private" {
   cidr_block        = cidrsubnet(aws_vpc.main.cidr_block, 8, count.index + length(local.availability_zones) * 1)
 
   tags = merge(local.common_tags, {
-    Name : "${local.tag_name.base}-private-${element(local.availability_zones, count.index)}"
+    Name : "${local.tag_name.base}-private-${element(local.availability_zones, count.index)}",
+    Hoge : "fuga"
   })
 }
 
@@ -49,18 +50,18 @@ resource "aws_subnet" "bastion" {
   })
 }
 
-resource "aws_eip" "nat" {
-  vpc = true
-}
-
-resource "aws_nat_gateway" "ngw" {
-  allocation_id = aws_eip.nat.id
-  subnet_id     = aws_subnet.bastion[0].id
-
-  tags = merge(local.common_tags, {
-    Name : "ngw-${local.tag_name.base}"
-  })
-}
+#resource "aws_eip" "nat" {
+#  vpc = true
+#}
+#
+#resource "aws_nat_gateway" "ngw" {
+#  allocation_id = aws_eip.nat.id
+#  subnet_id     = aws_subnet.bastion[0].id
+#
+#  tags = merge(local.common_tags, {
+#    Name : "ngw-${local.tag_name.base}"
+#  })
+#}
 
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
@@ -78,10 +79,10 @@ resource "aws_route_table" "public" {
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.main.id
 
-  route {
-    cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.ngw.id
-  }
+  #  route {
+  #    cidr_block     = "0.0.0.0/0"
+  #    nat_gateway_id = aws_nat_gateway.ngw.id
+  #  }
 
   tags = merge(local.common_tags, {
     Name : "${local.tag_name.base}-private"
